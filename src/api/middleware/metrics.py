@@ -11,7 +11,7 @@ from fastapi import FastAPI
 def setup_metrics(app: FastAPI):
     """
     Initialize Prometheus metrics.
-    
+
     Exposes /metrics endpoint.
     """
     instrumentator = Instrumentator(
@@ -22,9 +22,9 @@ def setup_metrics(app: FastAPI):
         inprogress_name="rag_api_inprogress",
         inprogress_labels=True,
     )
-    
+
     # Add standard metrics
     instrumentator.instrument(app)
-    
+
     # Expose endpoint
     instrumentator.expose(app, include_in_schema=True, tags=["Observability"])

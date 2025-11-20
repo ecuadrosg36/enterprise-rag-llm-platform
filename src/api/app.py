@@ -23,15 +23,15 @@ config = get_config()
 
 def create_app() -> FastAPI:
     """Create and configure FastAPI application."""
-    
+
     app = FastAPI(
         title=config.app_name,
         version=config.app_version,
         description="Enterprise RAG Platform API",
         docs_url="/docs",
-        redoc_url="/redoc"
+        redoc_url="/redoc",
     )
-    
+
     # CORS Middleware
     app.add_middleware(
         CORSMiddleware,
@@ -40,13 +40,13 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    
+
     # Logging Middleware
     app.add_middleware(RequestLoggingMiddleware)
-    
+
     # Metrics
     setup_metrics(app)
-    
+
     # Global Exception Handler
     @app.exception_handler(RAGError)
     async def rag_exception_handler(request: Request, exc: RAGError):
@@ -55,14 +55,14 @@ def create_app() -> FastAPI:
             content={
                 "error": exc.__class__.__name__,
                 "message": str(exc),
-                "details": exc.details
-            }
+                "details": exc.details,
+            },
         )
-    
+
     # Include Routers
     app.include_router(health.router)
     app.include_router(rag.router)
-    
+
     return app
 
 

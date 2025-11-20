@@ -6,9 +6,9 @@ from .embedding_factory import EmbeddingFactory
 from .embedding_cache import EmbeddingCache
 
 __all__ = [
-    'BaseEmbedder',
-    'OpenAIEmbedder',
-    'LocalEmbedder',
-    'EmbeddingFactory',
-    'EmbeddingCache',
+    "BaseEmbedder",
+    "OpenAIEmbedder",
+    "LocalEmbedder",
+    "EmbeddingFactory",
+    "EmbeddingCache",
 ]

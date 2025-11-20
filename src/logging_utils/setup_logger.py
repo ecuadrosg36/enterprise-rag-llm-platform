@@ -1,1 +1,1 @@
-print('Logger init')
+print("Logger init")

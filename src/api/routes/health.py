@@ -17,7 +17,5 @@ async def health_check(settings: Config = Depends(get_settings)):
     Returns service status and version.
     """
     return HealthResponse(
-        status="ok",
-        version=settings.app_version,
-        environment=settings.environment
+        status="ok", version=settings.app_version, environment=settings.environment
     )

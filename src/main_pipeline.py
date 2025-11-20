@@ -1,1 +1,1 @@
-print('Pipeline placeholder')
+print("Pipeline placeholder")

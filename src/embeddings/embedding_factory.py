@@ -19,25 +19,25 @@ logger = setup_logger(__name__)
 
 class EmbeddingFactory:
     """Factory for creating embedding providers."""
-    
+
     @staticmethod
     def create(config: Config) -> BaseEmbedder:
         """
         Create embedder instance based on configuration.
-        
+
         Args:
             config: Configuration object
-            
+
         Returns:
             Configured embedder instance
-            
+
         Raises:
             ConfigurationError: If provider is unknown
         """
         provider = config.embedding_provider
-        
+
         logger.info(f"Creating embedder for provider: {provider}")
-        
+
         if provider == "openai":
             return EmbeddingFactory._create_openai(config)
         elif provider == "local":
@@ -45,49 +45,41 @@ class EmbeddingFactory:
         else:
             raise ConfigurationError(
                 f"Unknown embedding provider: {provider}",
-                details={'provider': provider, 'valid_providers': ['openai', 'local']}
+                details={"provider": provider, "valid_providers": ["openai", "local"]},
             )
-    
+
     @staticmethod
     def _create_openai(config: Config) -> OpenAIEmbedder:
         """Create OpenAI embedder."""
-        model = config.get('embedding.openai.model', 'text-embedding-3-small')
-        batch_size = config.get('embedding.openai.batch_size', 100)
-        max_retries = config.get('embedding.openai.max_retries', 3)
-        
+        model = config.get("embedding.openai.model", "text-embedding-3-small")
+        batch_size = config.get("embedding.openai.batch_size", 100)
+        max_retries = config.get("embedding.openai.max_retries", 3)
+
         return OpenAIEmbedder(
-            model_name=model,
-            batch_size=batch_size,
-            max_retries=max_retries
+            model_name=model, batch_size=batch_size, max_retries=max_retries
         )
-    
+
     @staticmethod
     def _create_local(config: Config) -> LocalEmbedder:
         """Create local embedder."""
-        model = config.get('embedding.local.model', 'all-MiniLM-L6-v2')
-        device = config.get('embedding.local.device', None)
-        batch_size = config.get('embedding.local.batch_size', 32)
-        
-        return LocalEmbedder(
-            model_name=model,
-            device=device,
-            batch_size=batch_size
-        )
-    
+        model = config.get("embedding.local.model", "all-MiniLM-L6-v2")
+        device = config.get("embedding.local.device", None)
+        batch_size = config.get("embedding.local.batch_size", 32)
+
+        return LocalEmbedder(model_name=model, device=device, batch_size=batch_size)
+
     @staticmethod
     def create_from_provider(
-        provider: str,
-        model_name: Optional[str] = None,
-        **kwargs
+        provider: str, model_name: Optional[str] = None, **kwargs
     ) -> BaseEmbedder:
         """
         Create embedder directly from provider name (for testing).
-        
+
         Args:
             provider: Provider name ('openai' or 'local')
             model_name: Optional model name override
             **kwargs: Additional arguments passed to embedder
-            
+
         Returns:
             Embedder instance
         """
@@ -99,6 +91,5 @@ class EmbeddingFactory:
             return LocalEmbedder(model_name=model, **kwargs)
         else:
             raise ConfigurationError(
-                f"Unknown provider: {provider}",
-                details={'provider': provider}
+                f"Unknown provider: {provider}", details={"provider": provider}
             )

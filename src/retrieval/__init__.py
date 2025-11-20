@@ -5,8 +5,8 @@ from .hybrid_retriever import HybridRetriever
 from .context_assembler import ContextAssembler
 
 __all__ = [
-    'BaseRetriever',
-    'BM25Retriever',
-    'HybridRetriever',
-    'ContextAssembler',
+    "BaseRetriever",
+    "BM25Retriever",
+    "HybridRetriever",
+    "ContextAssembler",
 ]

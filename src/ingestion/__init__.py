@@ -7,12 +7,12 @@ from .text_chunker import Chunk, RecursiveTextSplitter
 from .document_processor import DocumentProcessor
 
 __all__ = [
-    'Document',
-    'BaseDocumentLoader',
-    'PDFLoader',
-    'TXTLoader',
-    'DOCXLoader',
-    'Chunk',
-    'RecursiveTextSplitter',
-    'DocumentProcessor',
+    "Document",
+    "BaseDocumentLoader",
+    "PDFLoader",
+    "TXTLoader",
+    "DOCXLoader",
+    "Chunk",
+    "RecursiveTextSplitter",
+    "DocumentProcessor",
 ]

@@ -16,22 +16,22 @@ logger = setup_logger(__name__)
 
 class BaseRetriever(ABC):
     """Abstract base class for retrievers."""
-    
+
     @abstractmethod
     def retrieve(
         self,
         query: str,
         top_k: int = 5,
-        filter_metadata: Optional[Dict[str, Any]] = None
+        filter_metadata: Optional[Dict[str, Any]] = None,
     ) -> List[SearchResult]:
         """
         Retrieve relevant documents for a query.
-        
+
         Args:
             query: Search query string
             top_k: Number of documents to return
             filter_metadata: Optional metadata filters
-            
+
         Returns:
             List of SearchResult objects
         """
