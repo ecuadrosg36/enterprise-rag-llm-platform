@@ -79,6 +79,7 @@ class RateLimitError(RAGError):
 
     pass
 
+
 class EvaluationError(RAGError):
     """Error during RAG evaluation."""
 
