@@ -1,0 +1,37 @@
+# Development Environment Overrides
+
+app:
+  environment: "dev"
+
+embedding:
+  provider: "local"  # Use local embeddings for dev (no API costs)
+  
+  local:
+    model: "all-MiniLM-L6-v2"  # Faster model for dev
+    device: "cpu"
+
+llm:
+  provider: "openai"  # Can use OpenAI for dev
+  
+  openai:
+    model: "gpt-3.5-turbo"  # Cheaper model for dev
+    temperature: 0.7
+    max_tokens: 500
+
+vector_store:
+  persist_directory: "./data/chromadb_dev"
+
+api:
+  reload: true  # Hot reload for development
+  workers: 1
+
+logging:
+  level: "DEBUG"
+  console:
+    colorize: true
+
+safeguards:
+  enabled: true
+
+retrieval:
+  use_reranker: false  # Faster retrieval in dev

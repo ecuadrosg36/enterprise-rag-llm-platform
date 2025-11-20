@@ -1,0 +1,54 @@
+# Production Environment Overrides
+
+app:
+  environment: "prod"
+
+embedding:
+  provider: "openai"  # Use OpenAI for better quality in prod
+  
+  openai:
+    model: "text-embedding-3-large"
+    batch_size: 100
+
+llm:
+  provider: "openai"
+  
+  openai:
+    model: "gpt-4-turbo-preview"
+    temperature: 0.5  # Lower temperature for consistency
+    max_tokens: 1500
+
+vector_store:
+  persist_directory: "/var/data/chromadb"
+  
+  hnsw:
+    construction_ef: 400  # Better index quality
+    search_ef: 200
+
+api:
+  reload: false
+  workers: 8  # More workers for production
+  
+  rate_limit:
+    enabled: true
+    requests_per_minute: 100
+
+logging:
+  level: "INFO"
+  
+  file:
+    path: "/var/log/rag/rag.log"
+    max_bytes: 52428800  # 50MB
+    backup_count: 10
+
+retrieval:
+  use_reranker: true  # Better quality in prod
+  rerank_top_k: 20
+
+safeguards:
+  enabled: true
+  min_confidence: 0.7  # Stricter in production
+
+observability:
+  metrics:
+    enabled: true

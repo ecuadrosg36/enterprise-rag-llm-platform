@@ -1,0 +1,164 @@
+# Enterprise RAG Configuration
+# Base configuration - can be overridden by config.dev.yaml or config.prod.yaml
+
+# Application
+app:
+  name: "enterprise-rag-platform"
+  version: "1.0.0"
+  environment: "dev"
+
+# Embedding Configuration
+embedding:
+  provider: "local"  # "openai" or "local"
+  
+  # OpenAI settings
+  openai:
+    model: "text-embedding-3-small"  # or "text-embedding-3-large"
+    batch_size: 100
+    max_retries: 3
+    timeout: 30
+  
+  # Local embedding settings
+  local:
+    model: "all-MiniLM-L6-v2"  # Fast, 384 dim
+    # Alternative: "all-mpnet-base-v2" (768 dim, slower but better)
+    device: "cpu"  # or "cuda" if GPU available
+    batch_size: 32
+  
+  # Caching
+  cache:
+    enabled: true
+    max_size: 10000
+    disk_cache_dir: "./data/cache/embeddings"
+
+# Vector Store Configuration
+vector_store:
+  backend: "chromadb"
+  persist_directory: "./data/chromadb"
+  collection_name: "enterprise_docs"
+  
+  # ChromaDB settings
+  distance_metric: "cosine"  # "cosine", "l2", "ip"
+  hnsw:
+    space: "cosine"
+    construction_ef: 200
+    search_ef: 100
+
+# Document Ingestion
+ingestion:
+  chunk_size: 512  # tokens
+  chunk_overlap: 50  # tokens
+  separators: ["\n\n", "\n", ". ", " "]
+  
+  # Supported formats
+  supported_formats: ["pdf", "txt", "docx"]
+  
+  # Processing
+  batch_size: 10
+  max_workers: 4
+
+# Retrieval Configuration
+retrieval:
+  top_k: 5
+  similarity_threshold: 0.7
+  
+  # Hybrid search
+  use_hybrid: true
+  vector_weight: 0.7
+  bm25_weight: 0.3
+  
+  # Reranking
+  use_reranker: false
+  reranker_model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  rerank_top_k: 10
+
+# LLM Generation
+llm:
+  provider: "openai"  # "openai" or "groq"
+  
+  # OpenAI settings
+  openai:
+    model: "gpt-4-turbo-preview"
+    temperature: 0.7
+    max_tokens: 1000
+    top_p: 1.0
+  
+  # Groq settings
+  groq:
+    model: "llama-3-70b-8192"
+    temperature: 0.7
+    max_tokens: 1000
+  
+  # Generation settings
+  stream: false
+  include_sources: true
+  max_context_length: 4000
+
+# Hallucination Safeguards
+safeguards:
+  enabled: true
+  min_confidence: 0.6
+  check_grounding: true
+  fallback_response: "I don't have enough information to answer that question accurately."
+
+# RAG Evaluation
+evaluation:
+  enabled: false
+  test_dataset_path: "./data/eval/test_dataset.json"
+  metrics: ["faithfulness", "answer_relevancy", "context_precision", "context_recall"]
+  batch_size: 10
+
+# API Configuration
+api:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  reload: false
+  
+  # CORS
+  cors_origins: ["*"]
+  cors_allow_credentials: true
+  cors_allow_methods: ["*"]
+  cors_allow_headers: ["*"]
+  
+  # Rate limiting
+  rate_limit:
+    enabled: false
+    requests_per_minute: 60
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "json"  # "json" or "text"
+  
+  # File logging
+  file:
+    enabled: true
+    path: "./logs/rag.log"
+    max_bytes: 10485760  # 10MB
+    backup_count: 5
+  
+  # Console logging
+  console:
+    enabled: true
+    colorize: true
+
+# Observability
+observability:
+  correlation_id: true
+  track_latency: true
+  track_token_usage: true
+  
+  # Metrics
+  metrics:
+    enabled: true
+    export_path: "./data/metrics"
+
+# Data Paths
+paths:
+  raw_documents: "./data/raw"
+  processed_documents: "./data/processed"
+  vector_db: "./data/chromadb"
+  cache: "./data/cache"
+  logs: "./logs"
+  metrics: "./data/metrics"

@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./chroma_db:/app/chroma_db
+      - ./local_cache:/app/local_cache
+    environment:
+      - ENV=prod
+      - LOG_LEVEL=INFO
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  # Optional: Add ChromaDB server if switching to client-server mode
+  # chroma:
+  #   image: chromadb/chroma
+  #   ports:
+  #     - "8000:8000"
