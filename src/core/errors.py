@@ -78,3 +78,8 @@ class RateLimitError(RAGError):
     """Rate limit exceeded error (for external APIs)."""
 
     pass
+
+class EvaluationError(RAGError):
+    """Error during RAG evaluation."""
+
+    pass
