@@ -19,27 +19,6 @@ from src.retrieval import (
 from src.generation import OpenAILLM, RAGGenerator, BaseLLM
 
 
-"""
-API Dependencies.
-
-Dependency injection for RAG components.
-"""
-
-from functools import lru_cache
-from fastapi import Request
-
-from src.core.config import get_config, Config
-from src.embeddings import EmbeddingFactory, BaseEmbedder, EmbeddingCache
-from src.vector_store import ChromaVectorStore, BaseVectorStore
-from src.retrieval import (
-    BM25Retriever,
-    HybridRetriever,
-    ContextAssembler,
-    BaseRetriever,
-)
-from src.generation import OpenAILLM, RAGGenerator, BaseLLM
-
-
 @lru_cache()
 def get_settings() -> Config:
     """Get global configuration."""
