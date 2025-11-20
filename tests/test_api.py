@@ -30,9 +30,9 @@ def mock_rag_generator():
                 "text": "Source Text",
                 "metadata": {"source": "doc1"},
                 "score": 0.9,
-                "id": "1"
+                "id": "1",
             }
-        ]
+        ],
     }
     return generator
 
@@ -60,14 +60,14 @@ def test_rag_endpoint(client, mock_rag_generator):
     """Test RAG generation endpoint."""
     # Override dependency
     app.dependency_overrides[get_rag_generator] = lambda: mock_rag_generator
-    
+
     response = client.post("/rag", json={"query": "Test Query"})
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["answer"] == "Test Answer"
     assert len(data["source_documents"]) == 1
-    
+
     # Clean up
     app.dependency_overrides = {}
 
@@ -76,13 +76,13 @@ def test_embed_endpoint(client, mock_embedder):
     """Test embedding endpoint."""
     # Override dependency
     app.dependency_overrides[get_embedder] = lambda: mock_embedder
-    
+
     response = client.post("/embed", json={"text": "Test Text"})
-    
+
     assert response.status_code == 200
     data = response.json()
     assert len(data["embedding"]) == 3
     assert data["model"] == "test-model"
-    
+
     # Clean up
     app.dependency_overrides = {}

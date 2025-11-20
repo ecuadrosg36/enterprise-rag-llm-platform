@@ -1,1 +1,1 @@
-print('DAG')
+print("DAG")
