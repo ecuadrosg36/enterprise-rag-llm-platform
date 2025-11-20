@@ -21,7 +21,6 @@ router = APIRouter(tags=["RAG"])
 
 
 @router.post("/rag", response_model=RAGResponse)
-)
 async def generate_rag_response(
     request: RAGRequest, generator: RAGGenerator = Depends(get_rag_generator)
 ):
