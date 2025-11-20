@@ -5,8 +5,13 @@ Uses LLMs to generate question-answer pairs from documents.
 """
 
 from typing import List, Optional
-from ragas.testset.generator import TestsetGenerator
-from ragas.testset.evolutions import simple, reasoning, multi_context
+try:
+    from ragas.testset.generator import TestsetGenerator
+    from ragas.testset.evolutions import simple, reasoning, multi_context
+except ImportError:
+    # Fallback for different ragas versions
+    from ragas import TestsetGenerator
+    simple = reasoning = multi_context = None
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.document_loaders import DirectoryLoader
 

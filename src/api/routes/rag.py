@@ -20,8 +20,7 @@ logger = setup_logger(__name__)
 router = APIRouter(tags=["RAG"])
 
 
-@router.post(
-    "/rag", response_model=RAGResponse, responses={500: {"model": ErrorResponse}}
+@router.post("/rag", response_model=RAGResponse)
 )
 async def generate_rag_response(
     request: RAGRequest, generator: RAGGenerator = Depends(get_rag_generator)
