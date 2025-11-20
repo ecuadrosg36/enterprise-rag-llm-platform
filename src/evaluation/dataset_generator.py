@@ -9,11 +9,14 @@ from typing import List, Optional
 try:
     from ragas.testset.generator import TestsetGenerator
     from ragas.testset.evolutions import simple, reasoning, multi_context
-except ImportError:
-    # Fallback for different ragas versions
-    from ragas import TestsetGenerator
 
+    RAGAS_AVAILABLE = True
+except ImportError:
+    # Ragas not available - create placeholder
+    RAGAS_AVAILABLE = False
+    TestsetGenerator = None
     simple = reasoning = multi_context = None
+
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.document_loaders import DirectoryLoader
 
