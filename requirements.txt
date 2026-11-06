@@ -34,7 +34,8 @@ rank-bm25>=0.2.2
 groq>=0.4.0
 
 # RAG Evaluation
-ragas>=0.1.0
+ragas==0.3.9
+langchain-community==0.4.1
 datasets>=2.14.0
 
 # Caching
@@ -50,7 +51,7 @@ pytest>=7.4.0
 pytest-asyncio>=0.21.0
 pytest-cov>=4.1.0
 pytest-mock>=3.12.0
-black>=23.11.0
+black==26.10.1
 flake8>=6.1.0
 mypy>=1.7.0
 
