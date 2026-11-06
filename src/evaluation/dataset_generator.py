@@ -23,7 +23,6 @@ from langchain_community.document_loaders import DirectoryLoader
 from src.core.logger import setup_logger
 from src.core.errors import EvaluationError
 
-
 logger = setup_logger(__name__)
 
 

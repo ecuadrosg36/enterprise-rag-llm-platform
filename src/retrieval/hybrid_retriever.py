@@ -14,7 +14,6 @@ from src.embeddings.base_embedder import BaseEmbedder
 from src.core.logger import setup_logger
 from src.core.config import Config
 
-
 logger = setup_logger(__name__)
 
 

@@ -18,7 +18,6 @@ from src.ingestion.text_chunker import Chunk
 from src.core.logger import setup_logger
 from src.core.errors import RetrievalError
 
-
 logger = setup_logger(__name__)
 
 

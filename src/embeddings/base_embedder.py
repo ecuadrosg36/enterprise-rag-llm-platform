@@ -9,7 +9,6 @@ from typing import List, Optional
 
 from src.core.logger import setup_logger
 
-
 logger = setup_logger(__name__)
 
 

@@ -12,7 +12,6 @@ from src.ingestion.text_chunker import Chunk
 from src.embeddings.base_embedder import BaseEmbedder
 from src.core.logger import setup_logger
 
-
 logger = setup_logger(__name__)
 
 
