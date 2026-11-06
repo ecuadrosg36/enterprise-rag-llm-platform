@@ -10,7 +10,6 @@ from .base_loader import BaseDocumentLoader, Document
 from src.core.errors import DocumentLoadError
 from src.core.logger import setup_logger
 
-
 logger = setup_logger(__name__)
 
 

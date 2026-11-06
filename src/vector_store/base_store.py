@@ -12,7 +12,6 @@ from src.ingestion.base_loader import Document
 from src.ingestion.text_chunker import Chunk
 from src.core.logger import setup_logger
 
-
 logger = setup_logger(__name__)
 
 

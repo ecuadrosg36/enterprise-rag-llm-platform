@@ -17,7 +17,6 @@ from src.core.config import Config
 from src.core.errors import IndexingError, RetrievalError
 from src.core.logger import setup_logger
 
-
 logger = setup_logger(__name__)
 
 

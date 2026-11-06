@@ -12,7 +12,6 @@ from .base_embedder import BaseEmbedder
 from src.core.errors import EmbeddingError
 from src.core.logger import setup_logger
 
-
 logger = setup_logger(__name__)
 
 

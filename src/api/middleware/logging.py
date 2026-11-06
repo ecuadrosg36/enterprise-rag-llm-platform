@@ -14,7 +14,6 @@ from starlette.types import ASGIApp
 
 from src.core.logger import setup_logger, correlation_id_var
 
-
 logger = setup_logger(__name__)
 
 

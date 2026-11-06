@@ -8,7 +8,6 @@ from typing import List
 from src.vector_store.base_store import SearchResult
 from src.core.logger import setup_logger
 
-
 logger = setup_logger(__name__)
 
 

@@ -12,7 +12,6 @@ from src.retrieval.base_retriever import BaseRetriever
 from src.retrieval.context_assembler import ContextAssembler
 from src.core.logger import setup_logger
 
-
 logger = setup_logger(__name__)
 
 
