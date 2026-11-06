@@ -1,6 +1,6 @@
 # Enterprise RAG Platform 🚀
 
-A production-ready, modular **Retrieval-Augmented Generation (RAG)** platform built with Python, FastAPI, and ChromaDB. Designed for enterprise scale, observability, and extensibility.
+A modular **Retrieval-Augmented Generation (RAG)** service built with Python, FastAPI, and ChromaDB. It loads documents, stores their embeddings, and answers questions with an LLM, citing the chunks it used.
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.104%2B-green)
@@ -10,14 +10,22 @@ A production-ready, modular **Retrieval-Augmented Generation (RAG)** platform bu
 
 ## 🌟 Key Features
 
-*   **🏭 Production-Grade Architecture**: Modular design with dependency injection, type-safe config, and centralized error handling.
-*   **📄 Universal Ingestion**: robust loaders for PDF, DOCX, and TXT with recursive semantic chunking.
-*   **🧠 Hybrid Retrieval**: Combines **Vector Search** (Semantic) + **BM25** (Keyword) using **Reciprocal Rank Fusion (RRF)** for superior accuracy.
-*   **🔌 Pluggable Embeddings**: Support for **OpenAI**, **Groq**, and **Local (HuggingFace)** models with two-tier caching (Memory + Disk).
-*   **🤖 LLM Agnostic**: Seamless integration with OpenAI and Groq (Llama 3, Mixtral) via a unified interface.
-*   **📊 RAG Evaluation**: Built-in pipeline using **Ragas** to measure Faithfulness, Answer Relevancy, and Context Precision.
-*   **👁️ Observability**: Structured JSON logging, Correlation IDs, and Prometheus Metrics out-of-the-box.
-*   **🚀 API First**: High-performance FastAPI service with Pydantic validation and auto-generated docs.
+### Working today
+
+*   **📄 Ingestion**: loaders for PDF, DOCX and TXT, a recursive splitter (512 tokens, 50 overlap), and `examples/ingest_data.py` to embed and store chunks in ChromaDB.
+*   **🔌 Embeddings**: two providers, **OpenAI** and **local** (sentence-transformers `all-MiniLM-L6-v2`, the default).
+*   **🔎 Retrieval**: vector search in ChromaDB.
+*   **🤖 LLM**: one OpenAI-compatible client. It uses OpenAI, or Groq when the model name contains `groq` or `llama`.
+*   **🚀 API**: FastAPI with `POST /rag`, `POST /embed`, `GET /health` and `GET /metrics` (Prometheus, via `prometheus-fastapi-instrumentator`).
+*   **👁️ Logging**: JSON logs with a correlation ID per request (`X-Request-ID`).
+*   **🧪 Tests and CI**: pytest on Python 3.10 and 3.11, plus Black and Flake8, on every push.
+
+### Written, not wired in yet
+
+*   **BM25 and hybrid search**: `BM25Retriever` and Reciprocal Rank Fusion in `HybridRetriever` work in the tests. But nothing builds the BM25 index at ingest, so the API falls back to vector search only.
+*   **Embedding cache**: `EmbeddingCache` (memory + disk) is tested but no embedder uses it.
+*   **Ragas evaluation**: `src/evaluation/evaluator.py` computes faithfulness, answer relevancy and context precision, but no script runs it yet.
+*   **Placeholders**: `src/main_pipeline.py`, `orchestration/airflow/dags/ragshield_dag.py` and `scripts/download_data.py` only print a line, and `infra/terraform/main.tf` is empty.
 
 ---
 
@@ -33,22 +41,21 @@ graph TD
         RAG -->|Generate| LLM[LLM Service]
         
         Hybrid -->|Vector Search| Vector[ChromaDB]
-        Hybrid -->|Keyword Search| BM25[BM25 Index]
-        
-        Vector -->|Embed| Embed[Embedding Service]
-        Embed -->|Cache| Cache[Disk/Memory Cache]
+        Hybrid -.->|Keyword Search, index not built yet| BM25[BM25 Index]
+        Hybrid -->|Embed query| Embed[Embedding Service]
     end
     
     subgraph "Ingestion Pipeline"
         Docs[Documents] -->|Load| Loader[Document Loader]
         Loader -->|Chunk| Splitter[Recursive Splitter]
         Splitter -->|Index| Indexer[Index Manager]
+        Indexer -->|Embed chunks| Embed
         Indexer --> Vector
     end
     
     subgraph "Observability"
-        Logs[Structured Logs]
-        Metrics[Prometheus Metrics]
+        Logs[JSON Logs]
+        Metrics["/metrics endpoint"]
     end
     
     API -.-> Logs
@@ -69,8 +76,8 @@ graph TD
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/enterprise-rag-platform.git
-cd enterprise-rag-platform
+git clone https://github.com/ecuadrosg36/enterprise-rag-llm-platform.git
+cd enterprise-rag-llm-platform
 
 # Create virtual environment
 python -m venv venv
@@ -102,7 +109,6 @@ ENV=dev  # dev or prod
 Place your documents (PDF, TXT, DOCX) in the `data/` directory.
 
 ```bash
-# Run the ingestion script (you can create this based on usage examples)
 python examples/ingest_data.py
 ```
 
@@ -137,7 +143,7 @@ docker-compose up --build -d
 ```python
 from src.core.config import get_config
 from src.generation import RAGGenerator, OpenAILLM
-from src.retrieval import HybridRetriever
+from src.retrieval import HybridRetriever, ContextAssembler
 from src.embeddings import EmbeddingFactory
 from src.vector_store import ChromaVectorStore
 
@@ -149,7 +155,7 @@ retriever = HybridRetriever(vector_store, embedder)
 llm = OpenAILLM(model_name="gpt-3.5-turbo")
 
 # 2. Create Generator
-rag = RAGGenerator(llm, retriever)
+rag = RAGGenerator(llm, retriever, ContextAssembler())
 
 # 3. Ask a Question
 response = rag.generate("What is the vacation policy?")
@@ -157,6 +163,8 @@ response = rag.generate("What is the vacation policy?")
 print(f"Answer: {response['answer']}")
 print(f"Sources: {[doc['metadata']['source'] for doc in response['source_documents']]}")
 ```
+
+Or ask questions in the terminal with `python examples/demo_rag.py`.
 
 ### API Request
 
@@ -178,11 +186,7 @@ Run unit tests:
 pytest tests/
 ```
 
-Run RAG evaluation (requires Ragas):
-```bash
-# See examples/evaluate_rag.py
-python examples/evaluate_rag.py
-```
+The Ragas evaluator in `src/evaluation/` has no runner script yet (see above).
 
 ---
 
@@ -191,17 +195,18 @@ python examples/evaluate_rag.py
 ```
 .
 ├── config/                 # Configuration files (base, dev, prod)
-├── data/                   # Raw documents for ingestion
+├── data/                   # Your documents for ingestion (create it)
+├── examples/               # ingest_data.py, demo_rag.py
 ├── src/
 │   ├── api/                # FastAPI application & routes
 │   ├── core/               # Core utilities (config, logging, errors)
-│   ├── embeddings/         # Embedding providers & caching
+│   ├── embeddings/         # Embedding providers (cache written, not used)
 │   ├── evaluation/         # Ragas evaluation pipeline
 │   ├── generation/         # LLM & RAG logic
 │   ├── ingestion/          # Document loaders & chunking
-│   ├── retrieval/          # Hybrid search implementation
+│   ├── retrieval/          # Vector, BM25 and hybrid (RRF) retrievers
 │   └── vector_store/       # ChromaDB interface
-├── tests/                  # Unit & integration tests
+├── tests/                  # Unit tests
 ├── Dockerfile              # Docker build definition
 └── requirements.txt        # Python dependencies
 ```
