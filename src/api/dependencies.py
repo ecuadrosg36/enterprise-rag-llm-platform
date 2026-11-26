@@ -4,8 +4,12 @@ API Dependencies.
 Dependency injection for RAG components.
 """
 
+import os
+import secrets
 from functools import lru_cache
-from fastapi import Request
+from typing import Optional
+
+from fastapi import Header, HTTPException
 
 from src.core.config import get_config, Config
 from src.embeddings import EmbeddingFactory, BaseEmbedder, EmbeddingCache
@@ -25,8 +29,18 @@ def get_settings() -> Config:
     return get_config()
 
 
+def require_api_key(x_api_key: Optional[str] = Header(None)) -> None:
+    """Check the X-API-Key header against RAG_API_KEY. Open only when no key is set (dev; prod refuses to start)."""
+    expected = os.getenv("RAG_API_KEY")
+    if not expected:
+        return
+    if not x_api_key or not secrets.compare_digest(x_api_key, expected):
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
+
+@lru_cache()
 def get_embedder() -> BaseEmbedder:
-    """Get configured embedder instance."""
+    """Get configured embedder instance (cached: loading the model takes seconds)."""
     config = get_settings()
     return EmbeddingFactory.create(config)
 

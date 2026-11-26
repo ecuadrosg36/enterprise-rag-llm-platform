@@ -2,14 +2,14 @@
 FastAPI Application.
 """
 
+import os
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import time
-import uuid
 
 from src.core.config import get_config
-from src.core.logger import setup_logger
+from src.core.logger import setup_logger, correlation_id_var
 from src.core.errors import RAGError
 from src.api.routes import health, rag
 from src.api.middleware import RequestLoggingMiddleware, setup_metrics
@@ -32,13 +32,20 @@ def create_app() -> FastAPI:
         redoc_url="/redoc",
     )
 
-    # CORS Middleware
+    # Fail closed: a production API must not run without a key.
+    if not os.getenv("RAG_API_KEY"):
+        if config.environment == "prod":
+            raise RuntimeError("RAG_API_KEY must be set when ENV=prod.")
+        logger.warning("RAG_API_KEY is not set: /rag and /embed are open (dev only).")
+
+    # CORS: only the origins listed in CORS_ORIGINS (comma-separated); none by default.
+    origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # Configure appropriately for production
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_origins=origins,
+        allow_credentials=False,
+        allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type", "X-API-Key", "X-Request-ID"],
     )
 
     # Logging Middleware
@@ -50,12 +57,14 @@ def create_app() -> FastAPI:
     # Global Exception Handler
     @app.exception_handler(RAGError)
     async def rag_exception_handler(request: Request, exc: RAGError):
+        # Details stay in the logs: provider errors can echo request data or config.
+        logger.error(f"{exc.__class__.__name__}: {exc}")
         return JSONResponse(
-            status_code=500,  # Could map specific errors to 4xx
+            status_code=500,
             content={
                 "error": exc.__class__.__name__,
-                "message": str(exc),
-                "details": exc.details,
+                "message": "Request failed. Quote request_id when reporting it.",
+                "request_id": correlation_id_var.get(),
             },
         )
 
