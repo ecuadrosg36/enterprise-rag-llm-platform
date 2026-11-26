@@ -50,9 +50,11 @@ class ContextAssembler:
             page = result.document.metadata.get("page", "")
             source_info = f"{source} p.{page}" if page else source
 
+            # Tags mark where untrusted document text starts and ends (prompt-injection boundary).
             doc_text = (
-                f"[Document {i+1}] (Source: {source_info})\n"
+                f'<document id="{i+1}" source="{source_info}">\n'
                 f"{result.document.text}\n"
+                f"</document>\n"
             )
 
             # Rough token estimation (4 chars per token)

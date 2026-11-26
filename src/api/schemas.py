@@ -19,7 +19,7 @@ class HealthResponse(BaseModel):
 class RAGRequest(BaseModel):
     """RAG generation request."""
 
-    query: str = Field(..., min_length=1, description="User query")
+    query: str = Field(..., min_length=1, max_length=2000, description="User query")
     top_k: int = Field(5, ge=1, le=20, description="Number of documents to retrieve")
     filter_metadata: Optional[Dict[str, Any]] = Field(
         None, description="Metadata filters"
@@ -47,7 +47,7 @@ class RAGResponse(BaseModel):
 class EmbedRequest(BaseModel):
     """Embedding request."""
 
-    text: str = Field(..., min_length=1, description="Text to embed")
+    text: str = Field(..., min_length=1, max_length=8000, description="Text to embed")
 
 
 class EmbedResponse(BaseModel):

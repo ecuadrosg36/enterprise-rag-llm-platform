@@ -57,7 +57,9 @@ class RAGGenerator:
         Returns:
             Dictionary containing answer, source documents, and metadata
         """
-        logger.info(f"Processing RAG query: {query}")
+        logger.info(
+            f"Processing RAG query ({len(query)} chars)"
+        )  # not the text: queries can hold personal data
 
         # 1. Retrieve documents
         results = self.retriever.retrieve(

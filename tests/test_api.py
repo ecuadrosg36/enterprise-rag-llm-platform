@@ -86,3 +86,60 @@ def test_embed_endpoint(client, mock_embedder):
 
     # Clean up
     app.dependency_overrides = {}
+
+
+def test_rag_requires_api_key_when_set(client, mock_rag_generator, monkeypatch):
+    """With RAG_API_KEY set, /rag rejects a missing or wrong key and accepts the right one."""
+    monkeypatch.setenv("RAG_API_KEY", "secret-key")
+    app.dependency_overrides[get_rag_generator] = lambda: mock_rag_generator
+
+    assert client.post("/rag", json={"query": "q"}).status_code == 401
+    assert (
+        client.post(
+            "/rag", json={"query": "q"}, headers={"X-API-Key": "wrong"}
+        ).status_code
+        == 401
+    )
+    assert (
+        client.post(
+            "/rag", json={"query": "q"}, headers={"X-API-Key": "secret-key"}
+        ).status_code
+        == 200
+    )
+
+    app.dependency_overrides = {}
+
+
+def test_rag_rejects_oversized_query(client, mock_rag_generator):
+    app.dependency_overrides[get_rag_generator] = lambda: mock_rag_generator
+
+    assert client.post("/rag", json={"query": "x" * 2001}).status_code == 422
+
+    app.dependency_overrides = {}
+
+
+def test_rag_error_does_not_leak_details(client, mock_rag_generator):
+    mock_rag_generator.generate.side_effect = RuntimeError(
+        "sk-secret leaked in upstream error"
+    )
+    app.dependency_overrides[get_rag_generator] = lambda: mock_rag_generator
+
+    response = client.post("/rag", json={"query": "q"})
+
+    assert response.status_code == 500
+    assert "sk-secret" not in response.text
+    assert "request_id=" in response.json()["detail"]
+
+    app.dependency_overrides = {}
+
+
+def test_prod_refuses_to_start_without_api_key(monkeypatch):
+    import importlib
+
+    app_module = importlib.import_module("src.api.app")
+
+    monkeypatch.delenv("RAG_API_KEY", raising=False)
+    monkeypatch.setattr(app_module.config, "_env", "prod")
+
+    with pytest.raises(RuntimeError, match="RAG_API_KEY"):
+        app_module.create_app()

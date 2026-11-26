@@ -123,8 +123,7 @@ class TestContextAssembler:
 
         context = assembler.assemble(results)
 
-        assert "[Document 1]" in context
-        assert "doc1.pdf" in context
-        assert "Content 1" in context
-        assert "[Document 2]" in context
-        assert "Content 2" in context
+        assert (
+            '<document id="1" source="doc1.pdf p.1">\nContent 1\n</document>' in context
+        )
+        assert '<document id="2" source="doc2.txt">\nContent 2\n</document>' in context
